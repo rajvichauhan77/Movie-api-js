@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <title>Movies api</title>
+</head>
+<body>
+    
+    <div class="container p-4 m-auto my-3 border">
+        <div class="row">
+            <div class="col-4">
+                <select name="" id="genre">
+                   
+                </select>
+            </div>
+            <div class="col-4">
+                <input type="text" id="search" class="form-control" placeholder="Search movies">
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container border p-3">
+        <div class="row g-2" id="movies">
+        
+        </div>
+    </div>
+
+    <div class="container my-5">
+        <nav aria-label="Page navigation example" id="pagination" class="row ">
+            
+          </nav>
+    </div>
+    
+
+</body>
+
+    <script>
+
+        fetch(`https://api.themoviedb.org/3/movie/popular?api_key=617dfba34fac3c6681f2189d8b17203e&page=1`)
+        .then((res) =>{
+            return res.json()
+        })
+        .then((data) =>{
+            console.log(data)
+            showMovies(data.results)
+            pages(data.page)
+            
+        })
+
+
+         fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=617dfba34fac3c6681f2189d8b17203e&page=1`)
+         .then((res) =>{
+            return res.json()
+         })
+         .then((data) =>{
+            // console.log(data)
+            showGenres(data.genrs)
+            
+         })
+
+
+
+
+        function changePage(p){
+
+            fetch(`https://api.themoviedb.org/3/movie/popular?api_key=617dfba34fac3c6681f2189d8b17203e&page=${p}`)
+            .then((res) =>{
+                return res.json()
+            })
+            .then((data) =>{
+                console.log(data)
+                showMovies(data.results)
+                pages(data.page)
+            })
+        }
+
+
+    document.getElementById("search").addEventListener("change", function(e){
+    let search = e.target.value;
+    console.log(search)
+    fetch(`https://api.themoviedb.org/3/search/movie?api_key=617dfba34fac3c6681f2189d8b17203e&query=${search}&page=1`)
+    .then((res) =>{
+        return res.json()
+    })
+    .then((data) =>{
+        console.log(data)
+        showMovies(data.results)
+        pages(data.page)
+    })
+    })
+
+        function showMovies(data){
+            document.getElementById("movies").innerHTML = ""
+            data.map((ele) =>{
+                document.getElementById("movies").innerHTML += `
+            <div class="col col-lg-2 col-md-2 col-sm-4 col-1">   
+            <div class="card h-100" >
+                <img src="https://image.tmdb.org/t/p/w500${ele.poster_path}" class="card-img-top" alt="...">
+                <div class="card-body">
+                  <h5 class="card-title">${ele.original_title}</h5>
+                  <p class="card-text">${ele.release_date}</p>
+                  <a href="#" class="btn btn-primary">More</a>
+                </div>
+              </div>
+              </div>
+                `
+            })
+        }
+
+
+        function pages(page){
+
+            document.getElementById("pagination").innerHTML = `
+
+            <ul class="pagination">
+              <li class="page-item"><a class="page-link" onclick="changePage(${page-1})">Prev</a></li>
+              <li class="page-item"><a class="page-link" >${page}</a></li>
+              <li class="page-item"><a class="page-link" onclick="changePage(${page+1})">Next</a></li>
+            </ul>
+
+            `
+        }
+
+
+        function showGenres(gen){
+            gen.map((ele) =>{
+                document.getElementById("genre").innerHTML += `
+                     <option value="${ele.id}">${ele.name}</option>
+                `
+            })
+        }
+
+        document.getElementById("genre").addEventListener("change", function(e){
+            console.log(e.target.value)
+
+            fetch(`https://api.themoviedb.org/3/movie/${e.target.value}/similar?api_key=617dfba34fac3c6681f2189d8b17203e&page=1`)
+            .then((res) =>{
+                return res.json()
+            })
+            .then((data) => {
+                console.log(data)
+                showMovies(data.results)
+                pages(data.page)
+            })
+        })
+
+    </script>
+
+</html>
+
+
+
+<!-- 617dfba34fac3c6681f2189d8b17203e key -->
